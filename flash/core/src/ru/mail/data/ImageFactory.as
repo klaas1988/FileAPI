@@ -178,12 +178,19 @@ package ru.mail.data
 				exifReader.processData(file.fileData);
 				if ( exifReader.hasKey("Orientation") ) {
 					// more info about orientation
-					// http://sylvana.net/jpegcrop/exif_orientation.html
-					var orientation:uint = uint(exifReader.getValue("Orientation"));
-
-					exif["Orientation"] = orientation;
+					// http://sylvana.net/jpegcrop/exif_orientation.html				
+					exif["Orientation"] = uint(exifReader.getValue("Orientation"));
 				}
+				if ( exifReader.hasKey("GPSInfoIFDPointer") ) {
+					exif["GPSInfoIFDPointer"] = uint(exifReader.getValue("GPSInfoIFDPointer"));
+					var gpsReader:ExifReader2 = new ExifReader2();
+					gpsReader.processData(file.fileData, exif["GPSInfoIFDPointer"]);
 
+					exif["GPSLatitude"] = gpsReader.getValue("GPSLatitude") as Array;
+					exif["GPSLongitude"] = gpsReader.getValue("GPSLongitude") as Array;
+					exif["GPSLatitudeRef"] = String(gpsReader.getValue("GPSLatitudeRef"));
+					exif["GPSLongitudeRef"] = String(gpsReader.getValue("GPSLongitudeRef"));
+				}
 			} catch (e:Error) {
 				trace ("read exif error: "+ e);
 			}
